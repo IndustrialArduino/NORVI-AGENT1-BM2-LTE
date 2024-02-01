@@ -11,3 +11,5 @@ Digital Inputs
 Analog Inputs with 4-20mA
 DIN-Rail mount
 
+Datasheet:   https://drive.google.com/open?id=1bgUju_ju2rY4FHfPXqdJiyfuH5L1Piq2&usp=drive_fs
+User Guide:  https://drive.google.com/open?id=1emvB68JDBm1cb-ttuKW0S7Lu5f3uvTGv&usp=drive_fs
