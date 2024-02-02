@@ -1,13 +1,5 @@
-#include "Wire. h"
-#include <Adafruit_GFX.h>
 #include <Adafruit_NeoPixel.h>
-#include <Adafruit_ADS1015.h>
-
-
-
-#define RXD 23
-#define TXD 13
-#define FC  32
+#include <Adafruit_ADS1X15.h>
 
 #define BUTTON_PIN   35    // Digital IO pin connected to the button.  This will be
                           // driven with a pull-up resistor so the switch should
@@ -18,58 +10,68 @@
 
 #define PIXEL_COUNT 1
 
+#define INPUT1 27
+#define INPUT2 26
+#define INPUT3 18
+#define INPUT4 19
+
+#define RXD 23  // RX RS485
+#define TXD 13  // TX RS485
+#define FC 32  //  FC RS485
+
 Adafruit_NeoPixel strip = Adafruit_NeoPixel(PIXEL_COUNT, PIXEL_PIN, NEO_GRB + NEO_KHZ800);
 
 bool oldState = HIGH;
 int showType = 0;
 
-Adafruit_ADS1115 ads1(0x48);
+Adafruit_ADS1115 ads1;
 
 int reading[8]={0};
 String adcString[8];
 
 void setup() {
+  // put your setup code here, to run once:
 
-  Serial.begin(115200);
+  Serial.begin(9600);
   
   pinMode(FC, OUTPUT); 
- digitalWrite(FC, HIGH);
+  digitalWrite(FC, HIGH);
 
- Serial1.begin(9600, SERIAL_8N1,RXD,TXD);
+  Serial1.begin(9600, SERIAL_8N1,RXD,TXD);
 
- digitalWrite(FC, HIGH);   // RS-485 
- Serial1.println(" ");
- 
-  pinMode(27, OUTPUT);
-  pinMode(26, OUTPUT);
-  pinMode(18, OUTPUT);
-  pinMode(19, OUTPUT);
- 
+  digitalWrite(FC, HIGH);   // RS-485 
+  
+  pinMode(INPUT1, OUTPUT);
+  pinMode(INPUT2, OUTPUT);
+  pinMode(INPUT3, OUTPUT);
+  pinMode(INPUT4, OUTPUT);
+
+
+
   delay(100);
   input_led_test();
   delay(500);
   input_led_test();
   delay(500);
   
-  pinMode(27, INPUT);
-  pinMode(26, INPUT);
-  pinMode(18, INPUT);
-  pinMode(19, INPUT);
+  pinMode(INPUT1, INPUT);
+  pinMode(INPUT2, INPUT);
+  pinMode(INPUT3, INPUT);
+  pinMode(INPUT4, INPUT);
 
   
-  ads1.begin();
+  ads1.begin(0x48);
   ads1.setGain(GAIN_ONE); 
 
   pinMode(BUTTON_PIN, INPUT_PULLUP);
   strip.begin();
   strip.show(); // Initialize all pixels to 'off'
+
+  digitalWrite(FC, HIGH);   // RS-485 
+  
 }
 
 void loop() {
- 
-  
-      Serial1.println();
-  
   // put your main code here, to run repeatedly:
   bool newState = digitalRead(BUTTON_PIN);
 
@@ -87,35 +89,35 @@ void loop() {
     }
   }
 
+ 
   // Set the last button state to the old state.
   oldState = newState;
 
- 
-  Serial1.println("  ");
-  Serial.print("I1: ");Serial.println(digitalRead(27));
-  Serial.print("I2: ");Serial.println(digitalRead(26));
-  Serial.print("I3: ");Serial.println(digitalRead(18));
-  Serial.print("I4: ");Serial.println(digitalRead(19));
+  
+  Serial.print("I1: ");Serial.println(digitalRead(INPUT1));
+  Serial.print("I2: ");Serial.println(digitalRead(INPUT2));
+  Serial.print("I3: ");Serial.println(digitalRead(INPUT3));
+  Serial.print("I4: ");Serial.println(digitalRead(INPUT4));
 
   adcString[0] = String(ads1.readADC_SingleEnded(0));
   adcString[0] = String(ads1.readADC_SingleEnded(0));
-  delay(10);
+  delay(200);
   adcString[1] = String(ads1.readADC_SingleEnded(1));
   adcString[1] = String(ads1.readADC_SingleEnded(1));
-  delay(10);
+  delay(200);
   adcString[2] = String(ads1.readADC_SingleEnded(2));
   adcString[2] = String(ads1.readADC_SingleEnded(2));
-  delay(10);
+  delay(200);
   adcString[3] = String(ads1.readADC_SingleEnded(3));
   adcString[3] = String(ads1.readADC_SingleEnded(3));
-  delay(10);
+  delay(200);
+  
   Serial.print("A1: ");Serial.print(adcString[0]);Serial.print("  ");
   Serial.print("A2: ");Serial.println(adcString[1]);
   Serial.print("A3: ");Serial.print(adcString[2]);Serial.print("  ");
   Serial.print("A4: ");Serial.println(adcString[3]);
 
-  
-  digitalWrite(FC, HIGH);                    // Make FLOW CONTROL pin HIGH
+digitalWrite(FC, HIGH);                    // Make FLOW CONTROL pin HIGH
   delay(500);
   Serial1.println(F("RS485 01 SUCCESS"));    // Send RS485 SUCCESS serially
   delay(500);                                // Wait for transmission of data
@@ -126,10 +128,9 @@ void loop() {
   
   while (Serial1.available()) {  // Check if data is available
     char c = Serial1.read();     // Read data from RS485
-    
-    Serial.write( c );// Print data on serial monitor
+    Serial.write(c);             // Print data on serial monitor
   }
- Serial.println(" ");
+
   Serial.println("____________________________________");  
 }
 
@@ -138,13 +139,13 @@ void input_led_test(){
   digitalWrite(27, LOW); 
   digitalWrite(26, HIGH);
   digitalWrite(18, HIGH);   
- // digitalWrite(19, HIGH);
+  digitalWrite(19, HIGH);
 
   delay(500);
   digitalWrite(27, HIGH); 
   digitalWrite(26, LOW);
   digitalWrite(18, HIGH);   
- // digitalWrite(19, HIGH);
+  digitalWrite(19, HIGH);
 
   delay(500);
   digitalWrite(27, HIGH); 
